@@ -3,7 +3,7 @@ import wx
 import praw
 import praw.util.token_manager
 from .. import refresh_token
-from ..utils import LabeledTextbox
+from .utils import LabeledTextbox
 
 
 class AuthorizeDialog(wx.Dialog):

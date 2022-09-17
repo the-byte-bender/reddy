@@ -1,17 +1,21 @@
 import wx
-def labeled_widget(parrent: wx.Window, label: str, widget: wx.Window, orient: int = wx.VERTICAL):
-    """
-    It takes a parent widget, a label string, a widget, and an optional orientation, and returns a tuple of the label widget, the widget, and a sizer that contains both of them
-    
-    @param parrent
-    @param label The text to display next to the widget.
-    @param widget The widget to be labeled.
-    @param orient The orientation of the sizer, optional.
-    
-    @return A tuple of the label widget, the widget, and the sizer.
-    """
-    sizer: wx.BoxSizer = wx.BoxSizer(orient)
-    label_widget: wx.StaticText = wx.StaticText(parrent, label = label)
-    sizer.Add(label_widget, 0)
-    sizer.Add(widget, 1, wx.EXPAND)
-    return label_widget, widget, sizer
+
+class LabeledTextbox(wx.Panel):
+    def __init__(self, parrent: wx.Window, label_text: str, initial_value: str = "", label_style: int = wx.ALIGN_CENTER_HORIZONTAL, textctrl_style: int = wx.TE_DONTWRAP):
+        """
+        It creates a panel with a label and a textctrl
+        
+        @param parrent
+        @param label_text The text to display in the label.
+        @param initial_value The initial value of the textctrl.
+        @param label_style wx.ALIGN_CENTER_HORIZONTAL
+        @param textctrl_style wx.TE_DONTWRAP
+        """
+        super().__init__(parrent)
+        self.sizer: wx.BoxSizer = wx.BoxSizer()
+        self.label: wx.StaticText = wx.StaticText(self, label = label_text, style = label_style)
+        self.sizer.Add(self.label, 1, wx.ALIGN_LEFT|wx.EXPAND)
+        self.textctrl: wx.TextCtrl = wx.TextCtrl(self, value  = initial_value, style = textctrl_style)
+        self.sizer.Add(self.textctrl, 1, wx.ALIGN_LEFT|wx.EXPAND)
+        self.SetAutoLayout(True)
+        self.SetSizerAndFit(self.sizer)

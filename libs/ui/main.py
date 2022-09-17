@@ -1,5 +1,5 @@
 import wx
-from ..utils import labeled_widget
+from ..utils import LabeledTextbox
 
 
 class Main(wx.Frame):
@@ -19,16 +19,8 @@ class Main(wx.Frame):
         self.db_path: str = db_path
         self.panel: wx.Panel = wx.Panel(self)
         self.main_sizer: wx.BoxSizer = wx.BoxSizer()
-        self.temp_label, self.temp, self.temp_sizer = labeled_widget(
-            self.panel,
-            "Come back later",
-            wx.TextCtrl(
-                self.panel,
-                value="Nothing to do now, come back later when a feature or 2 is implemented!",
-                style = wx.TE_READONLY|wx.TE_MULTILINE|wx.TE_DONTWRAP
-            ),
-        )
-        self.main_sizer.Add(self.temp_sizer, flag=wx.EXPAND)
+        self.temp = LabeledTextbox(self.panel, "Come back later", "Nothing to do here. Come back when a feature or 2 is implemented", textctrl_style= wx.TE_READONLY|wx.TE_DONTWRAP|wx.TE_MULTILINE)
+        self.main_sizer.Add(self.temp, 1, wx.EXPAND)
         self.temp_button = wx.Button(self.panel, label = "Close")
         self.temp_button.Bind(wx.EVT_BUTTON, lambda event: self.Close())
         self.main_sizer.Add(self.temp_button, flag = wx.ALIGN_BOTTOM)

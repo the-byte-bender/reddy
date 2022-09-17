@@ -31,5 +31,5 @@ class Main(wx.Frame):
         self.main_sizer.Add(self.temp_sizer, flag=wx.EXPAND)
         self.temp_button = wx.Button(self.panel, label = "Close")
         self.temp_button.Bind(wx.EVT_BUTTON, lambda event: self.Close())
-        self.main_sizer.Add(self.temp_button)
+        self.main_sizer.Add(self.temp_button, flag = wx.ALIGN_BOTTOM)
         self.panel.SetSizer(self.main_sizer)

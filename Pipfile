@@ -10,6 +10,7 @@ pypubsub = "*"
 praw = "*"
 
 [dev-packages]
+nuitka = "*"
 
 [requires]
 python_version = "3.9"

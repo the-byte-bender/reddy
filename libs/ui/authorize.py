@@ -1,8 +1,8 @@
-import threading
+import typing
 import wx
 import praw
 import praw.util.token_manager
-from .. import refresh_token
+from .. import refresh_token, threadpool
 from .utils import LabeledTextbox
 
 
@@ -27,19 +27,19 @@ class AuthorizeDialog(wx.Dialog):
         )
         self.main_sizer.Add(self.information, proportion=1)
 
-    def do_authorize(self):
-        token = refresh_token.get_refresh_token(self.reddit)
+    def do_authorize(self, token: typing.Optional[str]):
         if isinstance(token, str):
-            wx.CallAfter(self.db.register, token)
-            wx.CallAfter(self.Close)
+            self.db.register(token)
+            self.Close()
             self.success = True
         else:
-            wx.CallAfter(
-                self.information.textctrl.SetValue,
-                "Unexpected error. Please restart the app",
+            self.information.textctrl.SetValue(
+                "Unexpected error. Please restart the app"
             )
 
     def ShowModal(self):
-        threading.Thread(target=self.do_authorize, daemon=True).start()
+        threadpool.submit(
+            refresh_token.get_refresh_token, self.do_authorize, self.reddit
+        )
         super().ShowModal()
         return self.success

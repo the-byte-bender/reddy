@@ -9,9 +9,9 @@ import praw
 def get_refresh_token(reddit: praw.Reddit):
     """
     It opens a browser window, waits for the user to log in, and then returns the refresh token
-    
+
     @param reddit The Reddit instance to use for the OAuth dance.
-    
+
     @return The refresh token is being returned.
     """
     scopes: list[str] = ["*"]
@@ -35,7 +35,9 @@ def get_refresh_token(reddit: praw.Reddit):
         return 1
 
     refresh_token: str = reddit.auth.authorize(params["code"])
-    send_message(client, "Authorized. You may now close this tab and continue in the app")
+    send_message(
+        client, "Authorized. You may now close this tab and continue in the app"
+    )
 
     return refresh_token
 

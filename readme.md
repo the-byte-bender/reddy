@@ -1,6 +1,17 @@
 # Reddy
 
-Reddy is a Reddit client designed to satisfy the need for an open source, screenreader-accessible reddit client, especially on Linux.
+Reddy is a Reddit client designed to satisfy the need for an open source, screenreader-accessible reddit client on Linux.
+
+## Announcement about the accessibility status for Windows and Mac. Linux users should ignore.
+
+The fact that I (meatbag93) use a linux distribution as my main operating system was what initially inspired me to make this client. 
+I have made a little prototype that is accessible  on all 3 platforms that I made with wxpython. But I quickly learned that the Orca screenreader completely ignore's  wx.listctrl, wx.treectrl, and a few other widgets. Clearly, there is a problem here. 
+
+I've migrated to the gtk+ GUI library to increase linux accessibility. Despite being cross-platform, GTK+ is only fully accessible on Linux. It was confirmed to be completely inaccessible on Windows last I checked, and I'm quite sure it's the same on Mac.
+
+It's unfortunate, but Windows users already have excellent clients they can use, and I have a good feeling Mac users have the same.
+
+I truly apologize to everyone else; Linux is and will always be the major focus of this project. I won't make any effort to support Windows or Mac unless gtk+ is somehow made natively accessible on these platforms.
 
 ## What environment variables must I configure?
 

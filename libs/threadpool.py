@@ -1,7 +1,7 @@
 # Simple thread pool that can have functions submitted and it will call the spesified callback when the function finish's executing, in the main thread.
 import typing
 from concurrent.futures import Future, ThreadPoolExecutor
-import wx
+from gi.repository import GObject
 
 threadpool = ThreadPoolExecutor(2)
 callback_type = typing.Callable[[typing.Any], None]
@@ -25,4 +25,4 @@ def submit(
 
 
 def wrap(func: callback_type):
-    return lambda f: wx.CallAfter(func, f.result())
+    return lambda f: GObject.idle_add(func, f.result())

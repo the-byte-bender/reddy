@@ -4,9 +4,6 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-attrdict3 = "*"
-wxpython = "*"
-pypubsub = "*"
 praw = "*"
 
 [dev-packages]

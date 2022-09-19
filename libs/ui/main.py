@@ -1,12 +1,12 @@
-import wx
+from gi.repository import Gtk
 import praw
 import praw.util.token_manager
-from . import authorize
+from . import authorize, submitions_list
 from .utils import LabeledTextbox
-from .. import refresh_token
+from .. import refresh_token, threadpool
 
 
-class Main(wx.Frame):
+class Main(Gtk.Window):
     def __init__(
         self,
         title: str = "Reddy",
@@ -15,7 +15,8 @@ class Main(wx.Frame):
         user_agent: str = "reddy",
         db_path: str = "",
     ):
-        super().__init__(None, title=title)
+        super().__init__(title=title)
+        self.connect("destroy", Gtk.main_quit)
         self.title: str = title
         self.client_id: str = client_id
         self.client_secret: str = client_secret
@@ -31,22 +32,20 @@ class Main(wx.Frame):
             token_manager=self.refresh_tokens_db,
             user_agent=self.user_agent,
         )
-        self.panel: wx.Panel = wx.Panel(self)
         if not self.refresh_tokens_db.is_registered():
             success = authorize.AuthorizeDialog(
-                self.panel, self.reddit, self.refresh_tokens_db
-            ).ShowModal()
+                self, self.reddit, self.refresh_tokens_db
+            ).run()
             if not success:
-                self.Close()
-        self.main_sizer: wx.BoxSizer = wx.BoxSizer()
-        self.main_notebook: wx.Notebook = wx.Notebook(self.panel, style=wx.NB_BOTTOM)
-        self.main_sizer.Add(self.main_notebook)
-        self.temp = LabeledTextbox(
-            self.main_notebook,
-            "Come back later",
-            "Nothing to do here. Come back when a feature or 2 is implemented",
-            textctrl_style=wx.TE_READONLY | wx.TE_DONTWRAP | wx.TE_MULTILINE,
+                self.close()
+                return
+        self.main_notebook: Gtk.Notebook = Gtk.Notebook()
+        self.main_notebook.get_accessible().set_name("Main tab bar")
+        self.front_page: submitions_list.SubmitionsList = (
+            submitions_list.SubmitionsList("Front page", self.reddit.front.new(), True)
         )
-        self.main_notebook.AddPage(self.temp, "Home")
-        self.panel.SetSizer(self.main_sizer)
-        self.main_notebook.SetFocus()
+        self.add_tab("Front page", self.front_page)
+        self.add(self.main_notebook)
+
+    def add_tab(self, label: str, widget: Gtk.Widget):
+        self.main_notebook.append_page(widget, Gtk.Label(label))

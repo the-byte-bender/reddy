@@ -13,11 +13,11 @@ It's unfortunate, but Windows users already have excellent clients they can use,
 
 I truly apologize to everyone else; Linux is and will always be the major focus of this project. I won't make any effort to support Windows or Mac unless gtk+ is somehow made natively accessible on these platforms.
 
-## What environment variables must I configure?
+## optional environment variables you can configure
 
-1. `REDDY_CLIENT_ID` - put your reddit client ID there.
-2. `REDDY_CLIENT_SECRET` - put your reddit client secret there.
-3. `REDDY_DB_PATH` - put a  path to an sqlite database there (will be created  if not exists).
+1. `REDDY_CLIENT_ID` - put your reddit client ID there. If left out, it will default to Reddy's client ID (recommended).
+2. `REDDY_CLIENT_SECRET` - put your reddit client secret there. Do not set this if you are either using the default client ID or your client is not a web app or a personal script. Defaults to None (Reddy's official client is set as an installed app, so no secret is needed.)
+3. `REDDY_DB_PATH` - put a  path to an sqlite database there (will be created  if not exists). Defaults to ./reddy.db (this file is gitignored so feel free to keep it at that)
 
 ## How can  the environment for this project be created?
 

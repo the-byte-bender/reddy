@@ -26,6 +26,8 @@ I truly apologize to everyone else; Linux is and will always be the major focus 
 3. Run `pipenv install` to install all dependencies. This will also create a virtual environment for the project.
 4. To launch the program, run `pipenv run python reddy.py`.
 
+If you face any issues installing pygobject, please read [this](https://pygobject.readthedocs.io/en/latest/devguide/dev_environ.html) to know what dependincies you need to install
+
 ## License.
 
 The GPL-3.0 license applies to all code in this project. A copy of this license can be found in the file `LICENSE`.

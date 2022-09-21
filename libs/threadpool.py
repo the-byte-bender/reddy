@@ -3,7 +3,7 @@ import typing
 from concurrent.futures import Future, ThreadPoolExecutor
 from gi.repository import GObject
 
-threadpool = ThreadPoolExecutor(2)
+pools = [ThreadPoolExecutor(max_workers=2), ThreadPoolExecutor(max_workers=2)]
 callback_type = typing.Callable[[typing.Any], None]
 
 
@@ -15,6 +15,9 @@ def submit(
     *args,
     **kwargs
 ):
+    threadpool = pools[kwargs.get("threadpool", 0)]
+    if "threadpool" in kwargs:
+        del kwargs["threadpool"]
     future: Future = threadpool.submit(func, *args, **kwargs)
     if callback:
         if callable(callback):
@@ -22,6 +25,7 @@ def submit(
         else:
             for cb in callback:
                 future.add_done_callback(wrap(cb))
+        return future
 
 
 def wrap(func: callback_type):

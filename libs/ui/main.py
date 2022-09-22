@@ -42,7 +42,9 @@ class Main(Gtk.Window):
         self.main_notebook: Gtk.Notebook = Gtk.Notebook()
         self.main_notebook.get_accessible().set_name("Main tab bar")
         self.front_page: submitions_list.SubmitionsList = (
-            submitions_list.SubmitionsList("Front page", self.reddit.front.new(), True)
+            submitions_list.SubmitionsList(
+                "Front page", self.reddit.front.new(limit=None), True
+            )
         )
         self.add_tab("Front page", self.front_page)
         self.add(self.main_notebook)

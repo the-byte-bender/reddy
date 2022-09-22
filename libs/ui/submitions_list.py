@@ -1,3 +1,4 @@
+from itertools import islice
 import typing
 import praw.models
 from gi.repository import Gtk
@@ -8,11 +9,12 @@ class SubmitionsList(Gtk.Box):
     def __init__(
         self,
         label: str,
-        submitions: typing.Iterable[praw.models.Submission],
+        submissions: typing.Iterable[praw.models.Submission],
         show_subreddit_name: bool = False,
     ):
         super().__init__()
         self.show_subreddit_name: bool = show_subreddit_name
+        self.submissions = submissions
         self._active = True
         self.connect("destroy", lambda _: setattr(self, "_active", False))
         self.label = Gtk.Label(label)
@@ -21,6 +23,8 @@ class SubmitionsList(Gtk.Box):
         self.view = Gtk.TreeView()
         self.view.set_model(self.liststore)
         self.view.get_accessible().set_name(label)
+        self.selection = self.view.get_selection()
+        self.selection.connect("changed", self.on_selection_change)
         self.add(self.view)
         self.text_renderer = Gtk.CellRendererText()
         self.upvote_toggle = Gtk.CellRendererToggle()
@@ -49,8 +53,17 @@ class SubmitionsList(Gtk.Box):
             "Downvote", self.downvote_toggle, active=6
         )
         self.view.append_column(self.downvote_column)
-        for submission in submitions:
+        self.append_more_submissions()
+
+    def append_more_submissions(self):
+        for submission in islice(self.submissions, 50):
             self.append_submission(submission)
+
+    def on_selection_change(self, selection):
+        selection = self.view.get_selection()
+        model, iter = selection.get_selected()
+        if iter is not None and not model.iter_next(iter):
+            self.append_more_submissions()
 
     def _add_submission(self, submission: praw.models.Submission):
         item = []

@@ -2,6 +2,7 @@ from itertools import islice
 import typing
 import praw.models
 from gi.repository import Gtk
+from . import submission_dialog
 from .. import threadpool
 
 
@@ -21,6 +22,7 @@ class SubmitionsList(Gtk.Box):
         self.add(self.label)
         self.liststore = Gtk.ListStore(str, str, str, int, int, bool, bool, object)
         self.view = Gtk.TreeView()
+        self.view.connect("row-activated", self.on_activate)
         self.view.set_model(self.liststore)
         self.view.get_accessible().set_name(label)
         self.selection = self.view.get_selection()
@@ -119,3 +121,11 @@ class SubmitionsList(Gtk.Box):
             row[3] += 1
         row[6] = not downvote_value
         row[5] = False
+
+    def on_activate(self, widget, row, column):
+        iter_ = self.liststore.get_iter(row)
+        submission = self.liststore.get_value(iter_, 7)
+        dialog = submission_dialog.SubmissionDialog(self.get_toplevel(), submission)
+        dialog.show_all()
+        dialog.run()
+        dialog.destroy()

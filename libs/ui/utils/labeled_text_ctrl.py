@@ -13,6 +13,7 @@ class LabeledTextbox(Gtk.Box):
         super().__init__(Gtk.Orientation.VERTICAL)
         self.textbox: typing.Union[Gtk.Entry, Gtk.TextView]
         self.multiline: bool = multiline
+        self.editable: bool = editable
         self.text_buffer: Gtk.TextBuffer
         self.label = Gtk.Label(label_text)
         self.add(self.label)
@@ -35,7 +36,10 @@ class LabeledTextbox(Gtk.Box):
 
     def set_text(self, text: str):
         if self.multiline:
-            return self.text_buffer.set_text(text, -1)
+            self.text_buffer.set_text(text, -1)
+            if not self.editable:
+                self.text_buffer.place_cursor(self.text_buffer.get_start_iter())
+            return
         return self.textbox.set_text(text)
 
     text = property(get_text, set_text)

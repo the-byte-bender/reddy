@@ -1,8 +1,9 @@
+import contextlib
 from gi.repository import Gtk
 import praw
 import praw.util.token_manager
 from . import authorize, submitions_list
-from .utils import LabeledTextbox
+from .utils import LabeledTextbox, InputDialog, SimpleButton
 from .. import refresh_token, threadpool
 
 
@@ -41,13 +42,30 @@ class Main(Gtk.Window):
                 return
         self.main_notebook: Gtk.Notebook = Gtk.Notebook()
         self.main_notebook.get_accessible().set_name("Main tab bar")
-        self.front_page: submitions_list.SubmitionsList = (
-            submitions_list.SubmitionsList(
-                "Front page", self.reddit.front.new(limit=None), True
-            )
+        self.front_page: submitions_list.SubmitionsList = submitions_list.SubmitionsList(
+            "Front page", self.reddit.front.new(limit=None), True  # type: ignore
         )
         self.add_tab("Front page", self.front_page)
-        self.add(self.main_notebook)
+        self.box = Gtk.Box(Gtk.Orientation.HORIZONTAL)
+        self.box.add(self.main_notebook)
+        self.box.add(SimpleButton("New _tab", self.new_tab_dialog))
+        self.add(self.box)
 
     def add_tab(self, label: str, widget: Gtk.Widget):
         self.main_notebook.append_page(widget, Gtk.Label(label))
+        self.main_notebook.show_all()
+        page = self.main_notebook.get_n_pages() - 1
+        self.main_notebook.set_current_page(page)
+
+    def new_tab_dialog(self):
+        if subreddit_name := InputDialog("Please type in a subreddit", "r/").run():
+            with contextlib.suppress(Exception):
+                subreddit = self.reddit.subreddit(subreddit_name)
+                subreddit._fetch()
+                self.add_subreddit_as_tab(subreddit)
+
+    def add_subreddit_as_tab(self, subreddit):
+        subreddit_widget = submitions_list.SubmitionsList(
+            subreddit.display_name, subreddit.new(limit=None), False
+        )
+        self.add_tab(subreddit.display_name, subreddit_widget)

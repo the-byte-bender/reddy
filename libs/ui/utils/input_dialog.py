@@ -7,8 +7,11 @@ class InputDialog(Gtk.Dialog):
         super().__init__(title)
         self.box = self.get_content_area()
         self.input = LabeledTextbox(question, "")
+        self.input.textbox.set_activates_default(True)
         self.box.add(self.input)
-        self.add_button("Done", Gtk.ResponseType.OK)
+        button = self.add_button("Done", Gtk.ResponseType.OK)
+        button.set_can_default(True)
+        button.grab_default()
 
     def run(self):
         self.show_all()

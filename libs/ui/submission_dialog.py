@@ -121,7 +121,7 @@ class SubmissionDialog(Gtk.Dialog):
         if comment := ReplyDialog(
             self.get_toplevel(), "Write a comment", self.submission
         ).run():
-            self.add_comments(None, [comment])
+            self.add_comments(None, [comment], False)
 
     def reply(self):
         selection = self.comments_tree.get_selection()
@@ -131,5 +131,4 @@ class SubmissionDialog(Gtk.Dialog):
             self.get_toplevel(), "Write a reply", parent_comment
         ).run()
         if comment is not None:
-            print("\a")
-            self.add_comments(iter, [comment])
+            self.add_comments(iter, [comment], False)

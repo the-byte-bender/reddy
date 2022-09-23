@@ -18,7 +18,12 @@ def submit(
     threadpool = pools[kwargs.get("threadpool", 0)]
     if "threadpool" in kwargs:
         del kwargs["threadpool"]
-    future: Future = threadpool.submit(func, *args, **kwargs)
+    def wrapped_func(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        except Exception as e:
+            print(e)
+    future: Future = threadpool.submit(wrapped_func, *args, **kwargs)
     if callback:
         if callable(callback):
             future.add_done_callback(wrap(callback))

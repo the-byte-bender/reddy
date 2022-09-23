@@ -45,17 +45,27 @@ class Main(Gtk.Window):
         self.front_page: submitions_list.SubmitionsList = submitions_list.SubmitionsList(
             "Front page", self.reddit.front.new(limit=None), True  # type: ignore
         )
-        self.add_tab("Front page", self.front_page)
+        self.add_tab("Front page", self.front_page, False)
         self.box = Gtk.Box(Gtk.Orientation.HORIZONTAL)
         self.box.add(self.main_notebook)
         self.box.add(SimpleButton("New _tab", self.new_tab_dialog))
+        self.box.add(SimpleButton("_Close current tab", self.remove_current_tab))
         self.add(self.box)
 
-    def add_tab(self, label: str, widget: Gtk.Widget):
+    def add_tab(self, label: str, widget: Gtk.Widget, closable: bool = True):
+        widget._tab_closable = closable
         self.main_notebook.append_page(widget, Gtk.Label(label))
         self.main_notebook.show_all()
         page = self.main_notebook.get_n_pages() - 1
         self.main_notebook.set_current_page(page)
+
+    def remove_current_tab(self):
+        page_index = self.main_notebook.get_current_page()
+        page = self.main_notebook.get_nth_page(page_index)
+        if page._tab_closable:
+            self.main_notebook.remove_page(page_index)
+            self.main_notebook.set_current_page(page_index - 1)
+            self.main_notebook.show_all()
 
     def new_tab_dialog(self):
         if subreddit_name := InputDialog("Please type in a subreddit", "r/").run():

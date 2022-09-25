@@ -68,6 +68,7 @@ class SubmitionsList(Gtk.Box):
             self.append_more_submissions()
 
     def _add_submission(self, submission: praw.models.Submission):
+        submission._extra_replies = []
         item = []
         if self.show_subreddit_name:
             item.append(submission.subreddit.display_name)

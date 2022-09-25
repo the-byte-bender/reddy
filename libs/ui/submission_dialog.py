@@ -48,7 +48,9 @@ class SubmissionDialog(Gtk.Dialog):
         ]
         for column in self.columns:
             self.comments_tree.append_column(column)
-        self.add_comments(None, submission.comments)
+        comments = list(submission.comments)  # type: ignore
+        comments.extend(submission._extra_replies)
+        self.add_comments(None, comments)  # type: ignore
         self.add_action_widget(SimpleButton("_Comment...", self.comment), 0)
         self.add_action_widget(
             SimpleButton("_Reply to focused comment...", self.reply), 0
@@ -64,8 +66,12 @@ class SubmissionDialog(Gtk.Dialog):
         ],
         collapse_all: bool = True,
     ):
-        for comment in comments:
+        for index, comment in enumerate(comments):  # type: ignore
             if isinstance(comment, praw.models.Comment):
+                if not hasattr(comment, "_extra_replies"):
+                    comment._extra_replies = []
+                if comment in comments[:index]:  # type: ignore
+                    continue
                 position = self.comments_store.append(
                     parrent,
                     [
@@ -81,6 +87,7 @@ class SubmissionDialog(Gtk.Dialog):
                     ],
                 )
                 self.add_comments(position, comment.replies)
+                self.add_comments(position, comment._extra_replies)
                 if collapse_all:
                     self.comments_tree.collapse_all()
 
@@ -122,13 +129,15 @@ class SubmissionDialog(Gtk.Dialog):
             self.get_toplevel(), "Write a comment", self.submission
         ).run():
             self.add_comments(None, [comment], False)
+            self.submission._extra_replies.append(comment)
 
     def reply(self):
         selection = self.comments_tree.get_selection()
         model, iter = selection.get_selected()
-        parent_comment = self.comments_store.get_value(iter, 6)
+        parent_comment = self.comments_store.get_value(iter, 6)  # type: ignore
         comment = ReplyDialog(
             self.get_toplevel(), "Write a reply", parent_comment
         ).run()
         if comment is not None:
             self.add_comments(iter, [comment], False)
+            parent_comment._extra_replies.append(comment)

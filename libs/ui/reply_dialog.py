@@ -28,8 +28,8 @@ class ReplyDialog(Gtk.Dialog):
         self.box.add(self.parent_body)
         self.reply_body = LabeledTextbox("Your reply", "", True, True)
         self.box.add(self.reply_body)
-        self.add_button("Send", ID_SEND)
-        self.add_button("Cancel", ID_CANCEL)
+        self.add_button("_Send", ID_SEND)
+        self.add_button("_Cancel", ID_CANCEL)
 
     def run(self):
         self.show_all()

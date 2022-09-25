@@ -4,6 +4,7 @@ import gi
 gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk
 from libs.ui import main
+from libs import threadpool
 
 window: Gtk.Window = main.Main(
     title="Reddy",
@@ -14,3 +15,4 @@ window: Gtk.Window = main.Main(
 )
 window.show_all()
 Gtk.main()
+threadpool.pools[0].shutdown(False)

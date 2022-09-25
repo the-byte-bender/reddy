@@ -1,7 +1,8 @@
 import typing
 from gi.repository import Gtk
 import praw.models, praw.models.comment_forest
-from .utils import LabeledTextbox
+from .utils import LabeledTextbox, SimpleButton
+from .reply_dialog import ReplyDialog
 from .. import threadpool
 
 
@@ -27,6 +28,7 @@ class SubmissionDialog(Gtk.Dialog):
         self.comment_body = LabeledTextbox("Comment body", "", False, True)
         self.box.add(self.comment_body)
         self.selection = self.comments_tree.get_selection()
+        self.selection.set_mode(Gtk.SelectionMode.BROWSE)
         self.selection.connect("changed", self.on_selection_change)
         self.text_renderer = Gtk.CellRendererText()
         self.upvote_toggle = Gtk.CellRendererToggle()
@@ -46,7 +48,13 @@ class SubmissionDialog(Gtk.Dialog):
         ]
         for column in self.columns:
             self.comments_tree.append_column(column)
-        self.add_comments(None, submission.comments)
+        comments = list(submission.comments)  # type: ignore
+        comments.extend(submission._extra_replies)
+        self.add_comments(None, comments)  # type: ignore
+        self.add_action_widget(SimpleButton("_Comment...", self.comment), 0)
+        self.add_action_widget(
+            SimpleButton("_Reply to focused comment...", self.reply), 0
+        )
         self.add_button("Close", Gtk.ResponseType.CLOSE)
 
     def add_comments(
@@ -58,8 +66,12 @@ class SubmissionDialog(Gtk.Dialog):
         ],
         collapse_all: bool = True,
     ):
-        for comment in comments:
+        for index, comment in enumerate(comments):  # type: ignore
             if isinstance(comment, praw.models.Comment):
+                if not hasattr(comment, "_extra_replies"):
+                    comment._extra_replies = []
+                if comment in comments[:index]:  # type: ignore
+                    continue
                 position = self.comments_store.append(
                     parrent,
                     [
@@ -75,6 +87,7 @@ class SubmissionDialog(Gtk.Dialog):
                     ],
                 )
                 self.add_comments(position, comment.replies)
+                self.add_comments(position, comment._extra_replies)
                 if collapse_all:
                     self.comments_tree.collapse_all()
 
@@ -107,5 +120,24 @@ class SubmissionDialog(Gtk.Dialog):
     def on_selection_change(self, selection):
         selection = self.comments_tree.get_selection()
         model, iter = selection.get_selected()
-        comment = self.comments_store.get_value(iter, 6)
-        self.comment_body.set_text(comment.body)
+        if iter:
+            comment = self.comments_store.get_value(iter, 6)
+            self.comment_body.set_text(comment.body)
+
+    def comment(self):
+        if comment := ReplyDialog(
+            self.get_toplevel(), "Write a comment", self.submission
+        ).run():
+            self.add_comments(None, [comment], False)
+            self.submission._extra_replies.append(comment)
+
+    def reply(self):
+        selection = self.comments_tree.get_selection()
+        model, iter = selection.get_selected()
+        parent_comment = self.comments_store.get_value(iter, 6)  # type: ignore
+        comment = ReplyDialog(
+            self.get_toplevel(), "Write a reply", parent_comment
+        ).run()
+        if comment is not None:
+            self.add_comments(iter, [comment], False)
+            parent_comment._extra_replies.append(comment)

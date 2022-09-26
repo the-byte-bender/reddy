@@ -39,7 +39,9 @@ class SubmitionsList(Gtk.Box):
             "Subreddit", self.text_renderer, text=0
         )
         self.view.append_column(self.subreddit_name_column)
-        self.link_flair_column = Gtk.TreeViewColumn("Link flair", self.text_renderer, text=1)
+        self.link_flair_column = Gtk.TreeViewColumn(
+            "Link flair", self.text_renderer, text=1
+        )
         self.view.append_column(self.link_flair_column)
         self.title_column = Gtk.TreeViewColumn("Title", self.text_renderer, text=2)
         self.view.append_column(self.title_column)
@@ -69,7 +71,8 @@ class SubmitionsList(Gtk.Box):
         if iter is not None and not model.iter_next(iter):
             self.append_more_submissions()
 
-    def _add_submission(self, submission: praw.models.Submission):
+    def _add_submission(self, value: tuple[praw.models.Submission, bool]):
+        submission, prepend = value
         submission._extra_replies = []
         item = []
         if self.show_subreddit_name:
@@ -88,17 +91,20 @@ class SubmitionsList(Gtk.Box):
                 submission,
             ]
         )
-        self.liststore.append(item)
+        self.liststore.prepend(item) if prepend else self.liststore.append(item)
 
-    def load_submission(self, submission: praw.models.Submission):
+    def load_submission(self, submission: praw.models.Submission, prepend=False):
         if not self._active:
             return
         if not submission._fetched:
             submission.comments
-        return submission
+        return submission, prepend
 
     def append_submission(self, submission: praw.models.Submission):
         threadpool.submit(self.load_submission, self._add_submission, submission)
+
+    def prepend_submission(self, submission: praw.models.Submission):
+        threadpool.submit(self.load_submission, self._add_submission, submission, True)
 
     def do_upvote(self, renderer, treepath):
         row = self.liststore[treepath]
@@ -129,7 +135,7 @@ class SubmitionsList(Gtk.Box):
     def on_activate(self, widget, row, column):
         iter_ = self.liststore.get_iter(row)
         submission = self.liststore.get_value(iter_, 8)
-        dialog = submission_dialog.SubmissionDialog(self.get_toplevel(), submission)
+        dialog = submission_dialog.SubmissionDialog(self.get_toplevel(), submission)  # type: ignore
         dialog.show_all()
         dialog.run()
         dialog.destroy()

@@ -6,7 +6,7 @@ from . import submission_dialog
 from .. import threadpool
 
 
-class SubmitionsList(Gtk.Box):
+class SubmissionsList(Gtk.Box):
     def __init__(
         self,
         label: str,
@@ -59,6 +59,11 @@ class SubmitionsList(Gtk.Box):
             "Downvote", self.downvote_toggle, active=7
         )
         self.view.append_column(self.downvote_column)
+        self.set_submissions(submissions)
+
+    def set_submissions(self, submissions):
+        self.submissions = submissions
+        self.liststore.clear()
         self.append_more_submissions()
 
     def append_more_submissions(self):

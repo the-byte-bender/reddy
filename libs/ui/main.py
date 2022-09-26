@@ -2,7 +2,8 @@ import contextlib
 from gi.repository import Gtk
 import praw
 import praw.util.token_manager
-from . import authorize, submitions_list
+from . import authorize, submissions_list
+from .subreddit_view import SubredditView
 from .utils import LabeledTextbox, InputDialog, SimpleButton
 from .. import refresh_token, threadpool
 
@@ -42,7 +43,7 @@ class Main(Gtk.Window):
                 return
         self.main_notebook: Gtk.Notebook = Gtk.Notebook()
         self.main_notebook.get_accessible().set_name("Main tab bar")
-        self.front_page: submitions_list.SubmitionsList = submitions_list.SubmitionsList(
+        self.front_page: submissions_list.SubmissionsList = submissions_list.SubmissionsList(
             "Front page", self.reddit.front.new(limit=None), True  # type: ignore
         )
         self.add_tab("Front page", self.front_page, False)
@@ -75,7 +76,5 @@ class Main(Gtk.Window):
                 self.add_subreddit_as_tab(subreddit)
 
     def add_subreddit_as_tab(self, subreddit):
-        subreddit_widget = submitions_list.SubmitionsList(
-            subreddit.display_name, subreddit.new(limit=None), False
-        )
+        subreddit_widget = SubredditView(subreddit)
         self.add_tab(subreddit.display_name, subreddit_widget)

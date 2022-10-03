@@ -34,7 +34,7 @@ def get_refresh_token(reddit: praw.Reddit):
         send_message(client, params["error"])
         return 1
 
-    refresh_token: str = reddit.auth.authorize(params["code"])
+    refresh_token: str = reddit.auth.authorize(params["code"])  # type: ignore
     send_message(
         client, "Authorized. You may now close this tab and continue in the app"
     )

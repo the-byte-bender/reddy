@@ -1,3 +1,4 @@
+import os.path
 import contextlib
 from gi.repository import Gtk
 import praw
@@ -24,8 +25,8 @@ class Main(Gtk.Window):
         self.client_secret: str = client_secret
         self.user_agent: str = user_agent
         self.db_path: str = db_path
-        self.refresh_tokens_db = praw.util.token_manager.SQLiteTokenManager(
-            database=self.db_path, key=self.client_id
+        self.refresh_tokens_db = praw.util.token_manager.FileTokenManager(
+            filename=db_path
         )
         self.reddit = praw.Reddit(
             client_id=client_id,
@@ -34,10 +35,8 @@ class Main(Gtk.Window):
             token_manager=self.refresh_tokens_db,
             user_agent=self.user_agent,
         )
-        if not self.refresh_tokens_db.is_registered():
-            success = authorize.AuthorizeDialog(
-                self, self.reddit, self.refresh_tokens_db
-            ).run()
+        if not os.path.exists(db_path):
+            success = authorize.AuthorizeDialog(self, self.reddit, db_path).run()
             if not success:
                 self.close()
                 return

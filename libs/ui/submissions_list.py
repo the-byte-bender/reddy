@@ -1,3 +1,4 @@
+from threading import Lock
 from itertools import islice
 import typing
 import praw.models
@@ -14,6 +15,7 @@ class SubmissionsList(Gtk.Box):
         show_subreddit_name: bool = False,
     ):
         super().__init__()
+        self.lock = Lock()
         self.show_subreddit_name: bool = show_subreddit_name
         self.submissions = submissions
         self._active = True
@@ -64,17 +66,20 @@ class SubmissionsList(Gtk.Box):
     def set_submissions(self, submissions):
         self.submissions = submissions
         self.liststore.clear()
-        self.append_more_submissions()
+        threadpool.submit(self.append_more_submissions, None)
 
     def append_more_submissions(self):
-        for submission in islice(self.submissions, 50):
-            self.append_submission(submission)
+        with self.lock:
+            for submission in islice(self.submissions, 50):
+                self.append_submission(submission)
 
     def on_selection_change(self, selection):
+        if self.lock.locked():
+            return
         selection = self.view.get_selection()
         model, iter = selection.get_selected()
         if iter is not None and not model.iter_next(iter):
-            self.append_more_submissions()
+            threadpool.submit(self.append_more_submissions, None)
 
     def _add_submission(self, value: tuple[praw.models.Submission, bool]):
         submission, prepend = value

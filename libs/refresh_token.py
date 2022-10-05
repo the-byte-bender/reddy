@@ -1,9 +1,33 @@
+import keyring
 import random
 import webbrowser
 import socket
 import sys
 
 import praw
+from praw.util.token_manager import BaseTokenManager
+
+
+class KeyringTokenManager(BaseTokenManager):
+    def __init__(self):
+        super().__init__()
+        self.token = keyring.get_password("reddy", "reddy")
+
+    def post_refresh_callback(self, authorizer):
+        """Update the saved copy of the refresh token."""
+        self.token = authorizer.refresh_token
+        keyring.set_password("reddy", "reddy", authorizer.refresh_token)
+
+    def pre_refresh_callback(self, authorizer):
+        """Load the refresh token from the file."""
+        if authorizer.refresh_token is None:
+            if not self.token:
+                self.token = keyring.get_password("reddy", "reddy")
+            authorizer.refresh_token = self.token
+
+    def set_token(self, token: str):
+        self.token = token
+        keyring.set_password("reddy", "reddy", token)
 
 
 def get_refresh_token(reddit: praw.Reddit):

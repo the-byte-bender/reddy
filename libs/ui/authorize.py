@@ -11,14 +11,14 @@ class AuthorizeDialog(Gtk.Dialog):
         self,
         parrent: Gtk.Window,
         reddit: praw.Reddit,
-        db_path: str,
+        db: refresh_token.KeyringTokenManager,
     ):
         super().__init__("Please authorize access to your account")
         self.set_transient_for(parrent)
         self.set_modal(True)
         self.box: Gtk.Box = self.get_content_area()
         self.reddit = reddit
-        self.db_path = db_path
+        self.db = db
         self.success: bool = False
         self.information: LabeledTextbox = LabeledTextbox(
             "Information",
@@ -30,8 +30,7 @@ class AuthorizeDialog(Gtk.Dialog):
 
     def do_authorize(self, token: typing.Optional[str]):
         if isinstance(token, str):
-            with open(self.db_path, "w") as file:
-                file.write(token)
+            self.db.set_token(token)
             self.destroy()
             self.success = True
         else:

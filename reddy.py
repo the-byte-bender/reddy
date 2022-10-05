@@ -11,7 +11,6 @@ window: Gtk.Window = main.Main(
     client_id=os.getenv("REDDY_CLIENT_ID") or "TQbF2Bjmk_ilyTry-c_G8A",
     client_secret=os.getenv("REDDY_CLIENT_SECRET"),
     user_agent=os.getenv("REDDY_USER_AGENT") or "reddy",
-    db_path=os.getenv("REDDY_DB_PATH") or "./reddy.db",
 )
 window.show_all()
 Gtk.main()

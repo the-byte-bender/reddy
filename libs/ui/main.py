@@ -2,7 +2,6 @@ import os.path
 import contextlib
 from gi.repository import Gtk
 import praw
-import praw.util.token_manager
 from . import authorize, submissions_list
 from .subreddit_view import SubredditView
 from .utils import LabeledTextbox, InputDialog, SimpleButton
@@ -16,7 +15,6 @@ class Main(Gtk.Window):
         client_id: str = "",
         client_secret: str = "",
         user_agent: str = "reddy",
-        db_path: str = "",
     ):
         super().__init__(title=title)
         self.connect("destroy", Gtk.main_quit)
@@ -24,10 +22,7 @@ class Main(Gtk.Window):
         self.client_id: str = client_id
         self.client_secret: str = client_secret
         self.user_agent: str = user_agent
-        self.db_path: str = db_path
-        self.refresh_tokens_db = praw.util.token_manager.FileTokenManager(
-            filename=db_path
-        )
+        self.refresh_tokens_db = refresh_token.KeyringTokenManager()
         self.reddit = praw.Reddit(
             client_id=client_id,
             client_secret=client_secret,
@@ -35,8 +30,10 @@ class Main(Gtk.Window):
             token_manager=self.refresh_tokens_db,
             user_agent=self.user_agent,
         )
-        if not os.path.exists(db_path):
-            success = authorize.AuthorizeDialog(self, self.reddit, db_path).run()
+        if not self.refresh_tokens_db.token:
+            success = authorize.AuthorizeDialog(
+                self, self.reddit, self.refresh_tokens_db
+            ).run()
             if not success:
                 self.close()
                 return

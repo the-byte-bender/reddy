@@ -7,6 +7,7 @@ name = "pypi"
 praw = "*"
 pycairo = "*"
 pygobject = "*"
+keyring = "*"
 
 [dev-packages]
 nuitka = "*"

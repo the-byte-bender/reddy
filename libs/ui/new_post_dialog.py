@@ -1,3 +1,4 @@
+import contextlib
 import praw.models
 from gi.repository import Gtk
 from .utils import LabeledTextbox
@@ -11,7 +12,7 @@ class NewPostDialog(Gtk.Dialog):
         self.box.add(
             LabeledTextbox(
                 "Posting guidelines",
-                subreddit.post_requirements()["guidelines_text"] or "",
+                self.get_guidelines(subreddit),
                 False,
                 True,
             )
@@ -20,8 +21,9 @@ class NewPostDialog(Gtk.Dialog):
         self.box.add(self.title_box)
         self.flairs_store = Gtk.ListStore(str, str)
         self.flairs_store.append(["None", ""])
-        for flair in subreddit.flair.link_templates:
-            self.flairs_store.append([flair["text"], flair["id"]])
+        with contextlib.suppress(Exception):
+            for flair in subreddit.flair.link_templates:
+                self.flairs_store.append([flair["text"], flair["id"]])
         self.flair_combobox = Gtk.ComboBox()
         self.flair_combobox.get_accessible().set_name("Link flair:")
         self.flair_combobox.set_model(self.flairs_store)
@@ -40,6 +42,12 @@ class NewPostDialog(Gtk.Dialog):
         self.box.add(self.check_buttons)
         self.add_button("_Submit", Gtk.ResponseType.OK)
         self.add_button("_Cancel", Gtk.ResponseType.CANCEL)
+
+    def get_guidelines(self, subreddit):
+        try:
+            return subreddit.post_requirements()["guidelines_text"] or ""
+        except Exception as e:
+            return ""
 
     def get_selected_flair(self):
         treeiter = self.flair_combobox.get_active_iter()
